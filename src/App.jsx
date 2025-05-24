@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
+import Wizard from "./wizard/Wizard";
 
 // Páginas
 import Login from "./pages/Login";
@@ -37,6 +38,7 @@ function App() {
           <Route path="declaracion" element={<DeclaracionCripto />} />
           <Route path="finanzas" element={<FinanzasPersonales />} />
           <Route path="informe" element={<InformePDF />} />
+          <Route path="wizard" element={<Wizard />} />
         </Route>
         {/* Página 404 */}
         <Route path="*" element={<NotFound />} />

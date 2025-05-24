@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { register, login } from "../controllers/authController.js";
-import { verificarToken } from "../middleware/authMiddleware.js"; // 👈 Importa el middleware
+import { verificarToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -37,7 +37,12 @@ router.get(
         { expiresIn: "7d" }
       );
 
-      const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+      // 🔁 Redirección inteligente según origen
+      const isLocalhost = req.headers.host.includes("localhost");
+      const frontendURL = isLocalhost
+        ? "http://localhost:5173"
+        : process.env.FRONTEND_URL || "https://proyecto-renta.netlify.app";
+
       res.redirect(`${frontendURL}/login?token=${token}`);
     } catch (err) {
       console.error("❌ Error al generar token JWT:", err);
@@ -46,9 +51,9 @@ router.get(
   }
 );
 
-// ✅ Ruta protegida para obtener datos del usuario autenticado
+// Ruta protegida para obtener datos del usuario autenticado
 router.get("/me", verificarToken, (req, res) => {
-  res.json(req.usuario); // Este usuario lo puso el middleware
+  res.json(req.usuario);
 });
 
 export default router;

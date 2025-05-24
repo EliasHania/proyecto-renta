@@ -1,34 +1,46 @@
 // server/controllers/finanzasController.js
-import Finanza from "../models/Finanza.js";
+import Transaccion from "../models/Transaccion.js";
 
-// Obtener todas las finanzas
-export const obtenerFinanzas = async (req, res) => {
+export const obtenerResumenFinanzas = async (req, res) => {
   try {
-    const finanzas = await Finanza.find().sort({ fecha: -1 });
-    res.json(finanzas);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener finanzas" });
-  }
-};
+    const usuarioId = req.usuario._id;
+    const transacciones = await Transaccion.find({ usuarioId }).lean();
 
-// Crear nueva entrada
-export const crearFinanza = async (req, res) => {
-  try {
-    const nueva = new Finanza(req.body);
-    const guardada = await nueva.save();
-    res.status(201).json(guardada);
-  } catch (error) {
-    res.status(400).json({ mensaje: "Error al guardar" });
-  }
-};
+    let ganancias = 0;
+    let gastos = 0;
 
-// Eliminar por ID
-export const eliminarFinanza = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Finanza.findByIdAndDelete(id);
-    res.json({ mensaje: "Eliminado correctamente" });
+    for (const tx of transacciones) {
+      const valor = Number(tx.ValorEUR);
+      if (isNaN(valor) || valor === 0) continue; // Ignorar valores 0 o inválidos
+
+      if (
+        tx.Tipo === "recompensa" ||
+        tx.Tipo === "ingreso" ||
+        tx.Tipo === "fiat" ||
+        tx.Tipo === "compra"
+      ) {
+        // Solo sumar valores positivos para ganancias
+        if (valor > 0) ganancias += valor;
+      } else if (
+        tx.Tipo === "gasto" ||
+        tx.Tipo === "venta" ||
+        tx.Tipo === "futuros" ||
+        tx.Tipo === "futuros_estandar"
+      ) {
+        // Sumar valor absoluto para gastos (porque pueden venir negativos)
+        gastos += Math.abs(valor);
+      }
+    }
+
+    const saldo = ganancias - gastos;
+
+    res.json({
+      ganancias: ganancias.toFixed(2),
+      gastos: gastos.toFixed(2),
+      saldo: saldo.toFixed(2),
+    });
   } catch (error) {
-    res.status(400).json({ mensaje: "Error al eliminar" });
+    console.error("Error en obtenerResumenFinanzas:", error);
+    res.status(500).json({ mensaje: "Error al obtener resumen financiero" });
   }
 };

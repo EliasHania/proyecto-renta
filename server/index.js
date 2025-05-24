@@ -1,4 +1,3 @@
-// server/index.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -10,15 +9,27 @@ import "./config/passport.js"; // ✅ Configuración de Google Strategy
 import authRoutes from "./routes/authRoutes.js";
 import finanzasRoutes from "./routes/finanzasRoutes.js";
 import transaccionRoutes from "./routes/transaccionRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
+import declaracionRoutes from "./routes/declaracionRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// CORS con origen específico
+// ✅ CORS flexible para desarrollo y producción
+const whitelist = [
+  "http://localhost:5173",
+  "https://proyecto-renta.netlify.app",
+];
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      if (!origin || whitelist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("No permitido por CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -53,9 +64,11 @@ app.get("/", (req, res) => {
 });
 
 // Rutas API
-app.use("/api/auth", authRoutes); // ✅ Autenticación: login, register, Google
+app.use("/api/auth", authRoutes);
 app.use("/api/finanzas", finanzasRoutes);
 app.use("/api/transacciones", transaccionRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/declaracion", declaracionRoutes); // Aquí están resumen y pdf
 
 // Puerto
 const PORT = process.env.PORT || 5000;

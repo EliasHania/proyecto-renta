@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config(); // ⬅️ Asegura que las variables de entorno estén disponibles
+
 import passport from "passport";
 import GoogleStrategy from "passport-google-oauth20";
 import User from "../models/User.js";
