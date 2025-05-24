@@ -5,6 +5,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -49,6 +50,11 @@ const Login = () => {
     } catch (error) {
       setError("Error de conexión con el servidor.");
     }
+  };
+
+  const handleGoogleLogin = () => {
+    setLoadingGoogle(true);
+    window.location.href = `${import.meta.env.VITE_API_URL}/api/auth/google`;
   };
 
   return (
@@ -104,17 +110,21 @@ const Login = () => {
         </button>
 
         <div className="mt-4 text-center">
-          <a
-            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
-            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-100 transition"
+          <button
+            onClick={handleGoogleLogin}
+            type="button"
+            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-100 transition w-full"
+            disabled={loadingGoogle}
           >
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"
               alt="Google"
               className="w-5 h-5 mr-2"
             />
-            Iniciar sesión con Google
-          </a>
+            {loadingGoogle
+              ? "Redirigiendo a Google..."
+              : "Iniciar sesión con Google"}
+          </button>
         </div>
       </form>
     </div>
