@@ -1,13 +1,25 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleSubmit = (e) => {
+  // Captura token desde URL (Google OAuth)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      navigate("/dashboard");
+    }
+  }, [location, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (email.trim() === "" || password.trim() === "") {
@@ -15,12 +27,27 @@ const Login = () => {
       return;
     }
 
-    // Simulación de autenticación
-    if (email === "admin@renta.com" && password === "123456") {
-      localStorage.setItem("token", "token_simulado_123"); // Simulación de token
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.mensaje || "Error al iniciar sesión.");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
       navigate("/dashboard");
-    } else {
-      setError("Credenciales incorrectas.");
+    } catch (error) {
+      setError("Error de conexión con el servidor.");
     }
   };
 
@@ -75,6 +102,20 @@ const Login = () => {
         >
           Acceder
         </button>
+
+        <div className="mt-4 text-center">
+          <a
+            href={`${import.meta.env.VITE_API_URL}/api/auth/google`}
+            className="inline-flex items-center justify-center px-4 py-2 bg-white border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-100 transition"
+          >
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+              alt="Google"
+              className="w-5 h-5 mr-2"
+            />
+            Iniciar sesión con Google
+          </a>
+        </div>
       </form>
     </div>
   );

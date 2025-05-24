@@ -9,6 +9,7 @@ import Layout from "./components/Layout";
 
 // Páginas
 import Login from "./pages/Login";
+import Register from "./pages/Register"; // ✅ Importación añadida
 import Dashboard from "./pages/Dashboard";
 import DeclaracionCripto from "./pages/DeclaracionCripto";
 import FinanzasPersonales from "./pages/FinanzasPersonales";
@@ -19,9 +20,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta pública */}
+        {/* Rutas públicas */}
         <Route path="/login" element={<Login />} />
-
+        <Route path="/register" element={<Register />} /> {/* ✅ Nueva ruta */}
         {/* Rutas protegidas bajo layout */}
         <Route
           path="/"
@@ -37,7 +38,6 @@ function App() {
           <Route path="finanzas" element={<FinanzasPersonales />} />
           <Route path="informe" element={<InformePDF />} />
         </Route>
-
         {/* Página 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
