@@ -2,6 +2,7 @@ import express from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import { register, login } from "../controllers/authController.js";
+import { verificarToken } from "../middleware/authMiddleware.js"; // 👈 Importa el middleware
 
 const router = express.Router();
 
@@ -44,5 +45,10 @@ router.get(
     }
   }
 );
+
+// ✅ Ruta protegida para obtener datos del usuario autenticado
+router.get("/me", verificarToken, (req, res) => {
+  res.json(req.usuario); // Este usuario lo puso el middleware
+});
 
 export default router;

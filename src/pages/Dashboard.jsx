@@ -1,15 +1,60 @@
+import { useEffect, useState } from "react";
 import SelectorMoneda from "../components/SelectorMoneda";
 
 const Dashboard = () => {
+  const [usuario, setUsuario] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
   const handleMonedaChange = (nuevaMoneda) => {
     console.log("Moneda seleccionada:", nuevaMoneda);
-    // Aquí puedes guardar en context más adelante o usar para cálculos
+    // Puedes guardar en contexto más adelante si lo necesitas
   };
 
+  useEffect(() => {
+    const obtenerUsuario = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No hay sesión activa.");
+        setCargando(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error("No autorizado o token inválido");
+
+        const data = await res.json();
+        setUsuario(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    obtenerUsuario();
+  }, []);
+
+  if (cargando) return <p className="p-4">Cargando dashboard...</p>;
+
+  if (error)
+    return <div className="p-4 text-red-600 font-semibold">❌ {error}</div>;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Resumen general</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Bienvenido, {usuario.nombre} 👋
+          </h2>
+          <p className="text-sm text-gray-500">{usuario.email}</p>
+        </div>
         <SelectorMoneda onChange={handleMonedaChange} />
       </div>
 
