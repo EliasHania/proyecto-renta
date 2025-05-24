@@ -46,8 +46,6 @@ MONGO_URI=your_mongo_uri
 PORT=5000
 ```
 
-> Nunca subas `.env` reales, ya están ignorados por `.gitignore`
-
 ### 3. Instalar dependencias
 
 #### Frontend:
@@ -71,8 +69,6 @@ npm start
 
 - Backend: [Render](https://render.com)
 - Frontend: [Netlify](https://netlify.com)
-
-Recuerda cambiar `VITE_API_URL` en Netlify a la URL pública del backend en Render.
 
 ---
 
